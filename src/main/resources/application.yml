@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: jOOQ-first-look
+
+  datasource:
+    url: jdbc:mysql://localhost:33061/sakila
+    username: root
+    password: passwd
+
+  jooq:
+    sql-dialect: MySQL
+
+logging:
+  level:
+    org.jooq.tools.LoggerListener: debug

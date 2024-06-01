@@ -1,0 +1,18 @@
+plugins {
+    id 'java'
+}
+
+group = 'yamsroun'
+version = '0.0.1-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.jooq:jooq-codegen:${jooqVersion}"
+    runtimeOnly 'com.mysql:mysql-connector-j:8.2.0'
+}
+
+task prepareKotlinBuildScriptModel {
+}

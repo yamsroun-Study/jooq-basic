@@ -35,7 +35,7 @@ dependencies {
     implementation "org.jooq:jooq:${jooqVersion}"
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    jooqGenerator 'com.mysql:mysql-connector-j'
+    jooqGenerator project(':jOOQ-custom')
     jooqGenerator "org.jooq:jooq:${jooqVersion}"
     jooqGenerator "org.jooq:jooq-meta:${jooqVersion}"
 
@@ -72,6 +72,7 @@ jooq {
 
                     database {
                         name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        unsignedTypes = true //Default
 
                         schemata {
                             schema {
@@ -87,11 +88,20 @@ jooq {
                         fluentSetters = true
                         javaTimeTypes = true
                         deprecated = false
+
+                        //jpaAnnotations = true
+                        //jpaVersion = 2.2
+                        //validationAnnotations = true
+                        //springAnnotations = true
+                        //springDao = true
                     }
 
                     target {
                         directory = 'src/generated'
                     }
+
+                    //TODO 왜 서브모듈로 별도 분리해야 하는 걸까?
+                    strategy.name = 'jooq.custom.generator.JPrefixGeneratorStrategy'
                 }
             }
         }
