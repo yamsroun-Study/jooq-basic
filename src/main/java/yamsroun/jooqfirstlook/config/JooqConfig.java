@@ -9,7 +9,7 @@ public class JooqConfig {
 
     @Bean
     public DefaultConfigurationCustomizer jooqDefaultConfigurationCustomizer() {
-        return c -> c.settings()
+        return customizer -> customizer.settings()
             .withRenderSchema(false);
     }
 }
