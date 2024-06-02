@@ -5,6 +5,7 @@ import org.jooq.generated.tables.*;
 import org.jooq.generated.tables.daos.FilmDao;
 import org.jooq.generated.tables.pojos.Film;
 import org.springframework.stereotype.Repository;
+import yamsroun.jooqfirstlook.config.converter.PriceCategoryConverter;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -43,7 +44,7 @@ public class FilmRepositoryHasA {
                     .when(FILM.RENTAL_RATE.lessOrEqual(BigDecimal.valueOf(1.0)), "Cheap")
                     .when(FILM.RENTAL_RATE.lessOrEqual(BigDecimal.valueOf(3.0)), "Moderate")
                     .else_("Expensive")
-                    .as("price_category"),
+                    .as("price_category").convert(new PriceCategoryConverter()),
                 selectCount()
                     .from(INVENTORY)
                     .where(INVENTORY.FILM_ID.eq(FILM.FILM_ID))
@@ -51,7 +52,7 @@ public class FilmRepositoryHasA {
             .from(FILM)
             .where(containsValue(FILM.TITLE, filmTitle))
             .fetchInto(FilmPriceSummary.class);
-    }
+    }/**/
 
     public List<FilmRentalSummary> findFilmRentalSummaryByFilmTitleLike(String filmTitle) {
         JInventory INVENTORY = JInventory.INVENTORY;
