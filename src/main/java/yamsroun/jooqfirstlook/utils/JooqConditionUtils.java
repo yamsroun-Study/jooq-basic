@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -23,5 +24,12 @@ public class JooqConditionUtils {
             return DSL.noCondition();
         }
         return idField.in(ids);
+    }
+
+    public static <T> Condition containsValue(Field<T> field, String value) {
+        if (!StringUtils.hasText(value)) {
+            return DSL.noCondition();
+        }
+        return field.like("%" + value + "%");
     }
 }
