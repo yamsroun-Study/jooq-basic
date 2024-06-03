@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 public class ActorRepositoryConditionTest {
 
-    @Autowired ActorRepoistory repository;
+    @Autowired ActorRepository repository;
 
     @Test
     @DisplayName("and 조건 검색 - firstName과 lastName이 일치하는 배우 조회")

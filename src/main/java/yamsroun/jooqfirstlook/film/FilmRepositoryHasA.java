@@ -52,7 +52,7 @@ public class FilmRepositoryHasA {
             .from(FILM)
             .where(containsValue(FILM.TITLE, filmTitle))
             .fetchInto(FilmPriceSummary.class);
-    }/**/
+    }
 
     public List<FilmRentalSummary> findFilmRentalSummaryByFilmTitleLike(String filmTitle) {
         JInventory INVENTORY = JInventory.INVENTORY;
