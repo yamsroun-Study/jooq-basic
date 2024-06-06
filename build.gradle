@@ -1,8 +1,10 @@
+import org.jooq.meta.jaxb.*
+
 buildscript {
     ext {
         springBootVersion = '3.3.0'
         springDependencyManagementVersion = '1.1.5'
-        jooqGradlePlugin = '9.0'
+        jooqGradlePlugin = '6.0.24'
         jooqVersion = '3.19.9'
     }
 }
@@ -11,7 +13,7 @@ plugins {
     id 'java'
     id 'org.springframework.boot' version "${springBootVersion}"
     id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
-    id 'nu.studer.jooq' version "${jooqGradlePlugin}"
+    id 'dev.monosoul.jooq-docker' version "${jooqGradlePlugin}"
 }
 
 group = 'yamsroun'
@@ -38,13 +40,14 @@ dependencies {
     implementation "org.jooq:jooq:${jooqVersion}"
     runtimeOnly 'com.mysql:mysql-connector-j'
 
-    jooqGenerator project(':entity')
-    jooqGenerator project(':jOOQ-custom')
+    jooqCodegen project(':jOOQ-custom')
 
-    jooqGenerator "org.jooq:jooq:${jooqVersion}"
-    jooqGenerator "org.jooq:jooq-meta:${jooqVersion}"
-    jooqGenerator "org.jooq:jooq-meta-extensions-hibernate:${jooqVersion}"
-    jooqGenerator 'com.h2database:h2:1.4.200'
+    jooqCodegen "org.jooq:jooq:${jooqVersion}"
+    jooqCodegen "org.jooq:jooq-meta:${jooqVersion}"
+    jooqCodegen "org.jooq:jooq-codegen:${jooqVersion}"
+
+    jooqCodegen 'org.flywaydb:flyway-core'
+    jooqCodegen 'org.flywaydb:flyway-mysql'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -57,90 +60,59 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
-String dbUser = System.properties["db-user"] ?: "root"
-String dbPasswd = System.properties["db-passwd"] ?: "passwd"
-
 jooq {
     version = "${jooqVersion}"
-    configurations {
-        sakilaDb {
-            generationTool {
-                // DB 접속정보
-                //jdbc {
-                //    driver = 'com.mysql.cj.jdbc.Driver'
-                //    url = 'jdbc:mysql://localhost:33061'
-                //    user = "${dbUser}"
-                //    password = "${dbPasswd}"
-                //}
+    withContainer {
+        image {
+            name = "mysql:8.0"
+            envVars = [
+                    MYSQL_ROOT_PASSWORD: "passwd",
+                    MYSQL_DATABASE     : "sakila"
+            ]
+        }
 
-
-                generator {
-                    name = 'org.jooq.codegen.DefaultGenerator'
-
-                    database {
-                        //name = 'org.jooq.meta.mysql.MySQLDatabase'
-                        name = 'org.jooq.meta.extensions.jpa.JPADatabase'
-                        unsignedTypes = true //Default
-
-                        //schemata {
-                        //    schema {
-                        //        inputSchema = 'sakila'
-                        //    }
-                        //}
-
-                        properties {
-                            property {
-                                key = 'packages'
-                                value = 'yamsroun.entity'
-                            }
-
-                            property {
-                                key = 'useAttributeConverters' //2순위
-                                value = true
-                            }
-                        }
-
-                        forcedTypes { //1순위
-                            forcedType {
-                                userType = 'java.lang.Long'
-                                includeTypes = 'int unsigned'
-                            }
-
-                            forcedType {
-                                userType = 'java.lang.Integer'
-                                includeTypes = 'tinyint unsigned'
-                            }
-
-                            forcedType {
-                                userType = 'java.lang.Integer'
-                                includeTypes = 'smallint unsigned'
-                            }
-                        }
-                    }
-
-                    generate {
-                        daos = true
-                        records = true
-                        //immutablePojos = true
-                        fluentSetters = true
-                        javaTimeTypes = true
-                        deprecated = false
-
-                        //jpaAnnotations = true
-                        //jpaVersion = 2.2
-                        //validationAnnotations = true
-                        //springAnnotations = true
-                        //springDao = true
-                    }
-
-                    target {
-                        directory = 'src/generated'
-                    }
-
-                    //TODO 왜 서브모듈로 별도 분리해야 하는 걸까?
-                    strategy.name = 'jooq.custom.generator.JPrefixGeneratorStrategy'
-                }
+        db {
+            username = "root"
+            password = "passwd"
+            name = "sakila"
+            port = 3306
+            jdbc {
+                schema = "jdbc:mysql"
+                driverClassName = "com.mysql.cj.jdbc.Driver"
             }
+        }
+    }
+}
+
+tasks {
+    generateJooqClasses {
+        schemas.set(["sakila"])
+        outputDirectory.set(project.layout.projectDirectory.dir("src/generated"))
+        includeFlywayTable.set(false)
+
+        usingJavaConfig {
+            generate = new Generate()
+                    .withJavaTimeTypes(true)
+                    .withDeprecated(false)
+                    .withDaos(true)
+                    .withFluentSetters(true)
+                    .withRecords(true)
+
+            withStrategy(
+                    new Strategy().withName("jooq.custom.generator.JPrefixGeneratorStrategy")
+            )
+
+            database.withForcedTypes(
+                    new ForcedType()
+                            .withUserType("java.lang.Long")
+                            .withTypes("int unsigned"),
+                    new ForcedType()
+                            .withUserType("java.lang.Integer")
+                            .withTypes("tinyint unsigned"),
+                    new ForcedType()
+                            .withUserType("java.lang.Integer")
+                            .withTypes("smallint unsigned")
+            )
         }
     }
 }
