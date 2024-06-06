@@ -1,14 +1,17 @@
 buildscript {
     ext {
+        springBootVersion = '3.3.0'
+        springDependencyManagementVersion = '1.1.5'
+        jooqGradlePlugin = '9.0'
         jooqVersion = '3.19.9'
     }
 }
 
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.3.0'
-    id 'io.spring.dependency-management' version '1.1.5'
-    id 'nu.studer.jooq' version '9.0'
+    id 'org.springframework.boot' version "${springBootVersion}"
+    id 'io.spring.dependency-management' version "${springDependencyManagementVersion}"
+    id 'nu.studer.jooq' version "${jooqGradlePlugin}"
 }
 
 group = 'yamsroun'
@@ -35,9 +38,13 @@ dependencies {
     implementation "org.jooq:jooq:${jooqVersion}"
     runtimeOnly 'com.mysql:mysql-connector-j'
 
+    jooqGenerator project(':entity')
     jooqGenerator project(':jOOQ-custom')
+
     jooqGenerator "org.jooq:jooq:${jooqVersion}"
     jooqGenerator "org.jooq:jooq-meta:${jooqVersion}"
+    jooqGenerator "org.jooq:jooq-meta-extensions-hibernate:${jooqVersion}"
+    jooqGenerator 'com.h2database:h2:1.4.200'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -59,28 +66,41 @@ jooq {
         sakilaDb {
             generationTool {
                 // DB 접속정보
-                jdbc {
-                    driver = 'com.mysql.cj.jdbc.Driver'
-                    url = 'jdbc:mysql://localhost:33061'
-                    user = "${dbUser}"
-                    password = "${dbPasswd}"
-                }
+                //jdbc {
+                //    driver = 'com.mysql.cj.jdbc.Driver'
+                //    url = 'jdbc:mysql://localhost:33061'
+                //    user = "${dbUser}"
+                //    password = "${dbPasswd}"
+                //}
 
 
                 generator {
                     name = 'org.jooq.codegen.DefaultGenerator'
 
                     database {
-                        name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        //name = 'org.jooq.meta.mysql.MySQLDatabase'
+                        name = 'org.jooq.meta.extensions.jpa.JPADatabase'
                         unsignedTypes = true //Default
 
-                        schemata {
-                            schema {
-                                inputSchema = 'sakila'
+                        //schemata {
+                        //    schema {
+                        //        inputSchema = 'sakila'
+                        //    }
+                        //}
+
+                        properties {
+                            property {
+                                key = 'packages'
+                                value = 'yamsroun.entity'
+                            }
+
+                            property {
+                                key = 'useAttributeConverters' //2순위
+                                value = true
                             }
                         }
 
-                        forcedTypes {
+                        forcedTypes { //1순위
                             forcedType {
                                 userType = 'java.lang.Long'
                                 includeTypes = 'int unsigned'

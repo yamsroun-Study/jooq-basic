@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### ignore jOOQ generated DSL
+/src/generated
