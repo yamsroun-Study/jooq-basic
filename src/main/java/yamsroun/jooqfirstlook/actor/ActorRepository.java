@@ -120,13 +120,13 @@ public class ActorRepository {
             .fetchOneInto(Actor.class);
     }
 
-    public void bulkInsertWithRows(List<Actor> actors) {
+    public int bulkInsertWithRows(List<Actor> actors) {
         var rows = actors.stream()
             .map(actor -> DSL.row(
                 actor.getFirstName(),
                 actor.getLastName()))
             .toList();
-        dslContext.insertInto(ACTOR,
+        return dslContext.insertInto(ACTOR,
                 ACTOR.FIRST_NAME,
                 ACTOR.LAST_NAME)
             .valuesOfRows(rows)

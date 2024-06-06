@@ -1,5 +1,6 @@
 package yamsroun.jooqfirstlook;
 
+import org.assertj.core.api.Assertions;
 import org.jooq.generated.tables.pojos.Actor;
 import org.jooq.generated.tables.records.ActorRecord;
 import org.junit.jupiter.api.DisplayName;
@@ -110,6 +111,9 @@ public class JooqInsertTest {
         List<Actor> actorList = List.of(actor1, actor2);
 
         // when
-        actorRepository.bulkInsertWithRows(actorList);
+        int affectedRows = actorRepository.bulkInsertWithRows(actorList);
+
+        // then
+        Assertions.assertThat(affectedRows).isEqualTo(actorList.size());
     }
 }
