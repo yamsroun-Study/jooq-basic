@@ -132,4 +132,58 @@ public class ActorRepository {
             .valuesOfRows(rows)
             .execute();
     }
+
+    public void update(Actor actor) {
+        actorDao.update(actor);
+    }
+
+    public Actor findByActorId(long actorId) {
+        return actorDao.findById(actorId);
+    }
+
+    public int updateWithDto(long actorId, ActorUpdateRequest request) {
+        var firstName = request.getFirstName() != null ? DSL.val(request.getFirstName()) : DSL.noField(ACTOR.FIRST_NAME);
+        var lastName = request.getLastName() != null ? DSL.val(request.getLastName()) : DSL.noField(ACTOR.FIRST_NAME);
+
+        return dslContext.update(ACTOR)
+            .set(ACTOR.FIRST_NAME, firstName)
+            .set(ACTOR.LAST_NAME, lastName)
+            .where(ACTOR.ACTOR_ID.eq(actorId))
+            .execute();
+    }
+
+    public int updateWithRecord(long actorId, ActorUpdateRequest request) {
+        ActorRecord record = dslContext.fetchOne(ACTOR, ACTOR.ACTOR_ID.eq(actorId));
+        if (record == null) {
+            return 0;
+        }
+
+        if (request.getFirstName() != null) {
+            record.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            record.setLastName(request.getLastName());
+        }
+        return dslContext.update(ACTOR)
+            .set(record)
+            .where(ACTOR.ACTOR_ID.eq(actorId))
+            .execute();
+        //또는
+        //return record.update();
+    }
+
+    public int delete(long actorId) {
+        //actorDao.deleteById(actorId);
+        return dslContext.deleteFrom(ACTOR)
+            .where(ACTOR.ACTOR_ID.eq(actorId))
+            .execute();
+    }
+
+    public int deleteWithActiveRecord(long actorId) {
+        ActorRecord record = dslContext.fetchOne(ACTOR, ACTOR.ACTOR_ID.eq(actorId));
+        if (record == null) {
+            return 0;
+        }
+        return record.delete();
+    }
 }

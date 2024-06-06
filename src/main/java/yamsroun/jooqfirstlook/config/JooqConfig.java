@@ -1,5 +1,6 @@
 package yamsroun.jooqfirstlook.config;
 
+import org.jooq.conf.ExecuteWithoutWhere;
 import org.springframework.boot.autoconfigure.jooq.DefaultConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,8 @@ public class JooqConfig {
     @Bean
     public DefaultConfigurationCustomizer jooqDefaultConfigurationCustomizer() {
         return customizer -> customizer.settings()
-            .withRenderSchema(false);
+            .withRenderSchema(false)
+            .withExecuteUpdateWithoutWhere(ExecuteWithoutWhere.THROW)
+            .withExecuteDeleteWithoutWhere(ExecuteWithoutWhere.THROW);
     }
 }
