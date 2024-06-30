@@ -10,9 +10,12 @@ public class JooqConfig {
 
     @Bean
     public DefaultConfigurationCustomizer jooqDefaultConfigurationCustomizer() {
-        return customizer -> customizer.settings()
-            .withRenderSchema(false)
-            .withExecuteUpdateWithoutWhere(ExecuteWithoutWhere.THROW)
-            .withExecuteDeleteWithoutWhere(ExecuteWithoutWhere.THROW);
+        return customizer -> {
+            customizer.set(PerformanceListener::new);
+            customizer.settings()
+                .withRenderSchema(false)
+                .withExecuteUpdateWithoutWhere(ExecuteWithoutWhere.THROW)
+                .withExecuteDeleteWithoutWhere(ExecuteWithoutWhere.THROW);
+        };
     }
 }
